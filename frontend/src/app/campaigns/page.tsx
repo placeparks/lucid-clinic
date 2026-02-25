@@ -107,11 +107,10 @@ export default function CampaignsPage() {
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                statusFilter === s
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${statusFilter === s
                   ? "bg-indigo-600 text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
+                }`}
             >
               {s || "All"}
             </button>
@@ -123,11 +122,10 @@ export default function CampaignsPage() {
             <button
               key={c}
               onClick={() => setChannelFilter(c)}
-              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                channelFilter === c
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${channelFilter === c
                   ? "bg-indigo-600 text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
+                }`}
             >
               {c ? c.toUpperCase() : "All"}
             </button>
@@ -136,8 +134,8 @@ export default function CampaignsPage() {
       </div>
 
       {/* Campaign Table */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+        <table className="w-full text-sm min-w-[800px]">
           <thead>
             <tr className="text-left text-gray-500 bg-gray-50 border-b">
               <th className="px-4 py-3 font-medium">Name</th>

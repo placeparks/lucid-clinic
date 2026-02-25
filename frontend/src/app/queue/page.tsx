@@ -62,11 +62,10 @@ export default function QueuePage() {
             <Link
               key={s}
               href={active ? "/queue" : `/queue?status=${s}`}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors capitalize ${
-                active
+              className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors capitalize ${active
                   ? "bg-indigo-600 text-white border-indigo-600"
                   : "bg-white text-gray-600 border-gray-300 hover:border-gray-400"
-              }`}
+                }`}
             >
               {s}
             </Link>
@@ -82,8 +81,8 @@ export default function QueuePage() {
 
       {data && (
         <>
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <table className="w-full text-sm min-w-[800px]">
               <thead>
                 <tr className="text-left text-gray-500 bg-gray-50 border-b">
                   <th className="px-4 py-3 font-medium">Name</th>

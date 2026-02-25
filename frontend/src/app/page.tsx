@@ -55,7 +55,7 @@ export default function Dashboard() {
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatsCard label="Total Patients" value={overview.total_patients} />
         <StatsCard label="Queue Size" value={overview.queue_size} sub="Ready for outreach" />
         <StatsCard label="Has Email" value={overview.has_email} />
@@ -65,7 +65,7 @@ export default function Dashboard() {
       {/* Tier Breakdown */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
         <h2 className="text-lg font-semibold mb-4">Patient Tiers</h2>
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
           {overview.tiers.map((t) => (
             <div key={t.tier} className="text-center">
               <p className="text-2xl font-bold tabular-nums">{t.count.toLocaleString()}</p>
@@ -79,7 +79,7 @@ export default function Dashboard() {
       {coverage && (
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
           <h2 className="text-lg font-semibold mb-4">Contact Coverage</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatsCard label="Email + Phone" value={coverage.has_both} />
             <StatsCard label="Email Only" value={coverage.email_only} />
             <StatsCard label="Phone Only" value={coverage.phone_only} />
@@ -91,8 +91,8 @@ export default function Dashboard() {
       {/* Top Queue Items */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <h2 className="text-lg font-semibold mb-4">Top Re-engagement Candidates</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
+          <table className="w-full text-sm min-w-[600px]">
             <thead>
               <tr className="text-left text-gray-500 border-b">
                 <th className="pb-2 font-medium">Name</th>

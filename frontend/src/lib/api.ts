@@ -1,4 +1,11 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+let API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+// Ensure the API URL has a protocol to prevent Vercel doing relative fetches
+if (API_URL && !API_URL.startsWith("http")) {
+  API_URL = `https://${API_URL}`;
+}
+// Remove any trailing slashes to prevent double slashes in routes
+API_URL = API_URL.replace(/\/+$/, "");
 
 async function fetchApi<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {

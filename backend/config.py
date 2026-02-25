@@ -18,10 +18,12 @@ SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
 # CORS
-CORS_ORIGINS = os.getenv(
-    "CORS_ORIGINS",
-    "http://localhost:3000"
-).split(",")
+_cors_env = os.getenv("CORS_ORIGINS", "http://localhost:3000")
+CORS_ORIGINS = [
+    origin.strip().rstrip("/") 
+    for origin in _cors_env.split(",") 
+    if origin.strip()
+]
 
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 

@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD sh -c "gunicorn main:app -w 2 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:${PORT:-8000} --timeout 120"
+CMD sh -c "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} --timeout-keep-alive 65"

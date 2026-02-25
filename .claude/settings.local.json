@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(pip install:*)",
+      "Bash(python:*)",
+      "Bash(npm install)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(ls:*)",
+      "Bash(nslookup db.tmmffmsppaoekxbtzfcu.supabase.co)",
+      "Bash(npm install @supabase/supabase-js @supabase/ssr)"
+    ]
+  }
+}

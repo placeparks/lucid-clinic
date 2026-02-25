@@ -175,8 +175,9 @@ class MockVNCController(BaseVNCController):
 
 class LiveVNCController(BaseVNCController):
     """
-    Live VNC controller using raw RFB protocol via socket.
-    Connects to a real VNC server on Nick's clinic machine via Tailscale.
+    Live VNC controller.
+    Uses 'vncdo' CLI (from vncdotool) via subprocess to avoid twisted reactor
+    conflicts with the FastAPI/Uvicorn async event loop.
     """
 
     def __init__(self, host: str, port: int, password: str,
@@ -185,76 +186,109 @@ class LiveVNCController(BaseVNCController):
         self.host = host
         self.port = port
         self.password = password
-        self._sock: socket.socket | None = None
+        self._server = f"{host}::{port}"
+
+    def _run_vncdo(self, *command: str):
+        import subprocess
+        try:
+            # vncdo -s host::port -p password <command>
+            args = ["vncdo", "-s", self._server]
+            if self.password:
+                args.extend(["-p", self.password])
+            args.extend(command)
+
+            result = subprocess.run(
+                args,
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=15, # prevent hanging commands
+            )
+            return result
+        except subprocess.TimeoutExpired:
+            logger.error("vncdo command timed out: %s", command)
+            raise RuntimeError(f"VNC command timed out: {command}")
+        except subprocess.CalledProcessError as e:
+            logger.error("vncdo failed: %s (stderr: %s)", e, e.stderr)
+            raise RuntimeError(f"VNC interaction failed: {e.stderr}")
+        except FileNotFoundError:
+            logger.error("vncdo not found in PATH")
+            raise RuntimeError("vncdotool is not installed. Deploy failed or missing dependency.")
 
     def connect(self):
-        """Connect to VNC server. Requires vnc server to be running."""
+        """Verify connection by requesting a screenshot."""
+        logger.info("Verifying VNC connection at %s", self._server)
+        import tempfile
+        import os
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+            tmp_name = tmp.name
         try:
-            # We use a subprocess-based approach with screenshot tools
-            # rather than implementing full RFB protocol here.
-            # The actual VNC interaction will use pyautogui-style commands
-            # sent through the Tailscale tunnel.
-            logger.info("Connecting to VNC at %s:%d", self.host, self.port)
+            self._run_vncdo("capture", tmp_name)
             self.connected = True
-            logger.info("VNC connected successfully")
-        except Exception as e:
-            logger.error("VNC connection failed: %s", str(e))
-            raise ConnectionError(f"Could not connect to VNC at {self.host}:{self.port}") from e
+            logger.info("VNC connected and verified successfully")
+        finally:
+            if os.path.exists(tmp_name):
+                os.remove(tmp_name)
 
     def disconnect(self):
         self.connected = False
-        if self._sock:
-            try:
-                self._sock.close()
-            except Exception:
-                pass
-            self._sock = None
         logger.info("VNC disconnected")
 
     def screenshot(self) -> bytes:
         if not self.connected:
             raise RuntimeError("Not connected to VNC")
-        # In production: capture screen from VNC framebuffer
-        # Placeholder — will be implemented when Nick's machine is set up
-        raise NotImplementedError(
-            "Live VNC screenshot requires vnc server connection. "
-            "Set AGENT_MOCK_MODE=true for development."
-        )
+        import tempfile
+        import os
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+            tmp_name = tmp.name
+        try:
+            self._run_vncdo("capture", tmp_name)
+            with open(tmp_name, "rb") as f:
+                return f.read()
+        finally:
+            if os.path.exists(tmp_name):
+                os.remove(tmp_name)
 
     def click(self, x: int, y: int):
         if not self.connected:
             raise RuntimeError("Not connected to VNC")
-        raise NotImplementedError("Live VNC click — awaiting clinic machine setup")
+        self._run_vncdo("move", str(x), str(y), "click", "1")
 
     def double_click(self, x: int, y: int):
         if not self.connected:
             raise RuntimeError("Not connected to VNC")
-        raise NotImplementedError("Live VNC double_click — awaiting clinic machine setup")
+        # In vncdotool, we can just issue click twice quickly, or some support doubleclick
+        self._run_vncdo("move", str(x), str(y), "click", "1", "click", "1")
 
     def right_click(self, x: int, y: int):
         if not self.connected:
             raise RuntimeError("Not connected to VNC")
-        raise NotImplementedError("Live VNC right_click — awaiting clinic machine setup")
+        self._run_vncdo("move", str(x), str(y), "click", "3")
 
     def type_text(self, text: str):
         if not self.connected:
             raise RuntimeError("Not connected to VNC")
-        raise NotImplementedError("Live VNC type — awaiting clinic machine setup")
+        self._run_vncdo("type", text)
 
     def key(self, combo: str):
         if not self.connected:
             raise RuntimeError("Not connected to VNC")
-        raise NotImplementedError("Live VNC key — awaiting clinic machine setup")
+        # VNCdo expects keys like 'enter', 'tab', 'ctrl-c'
+        self._run_vncdo("key", combo.lower())
 
     def mouse_move(self, x: int, y: int):
         if not self.connected:
             raise RuntimeError("Not connected to VNC")
-        raise NotImplementedError("Live VNC mouse_move — awaiting clinic machine setup")
+        self._run_vncdo("move", str(x), str(y))
 
     def scroll(self, x: int, y: int, direction: str, amount: int = 3):
         if not self.connected:
             raise RuntimeError("Not connected to VNC")
-        raise NotImplementedError("Live VNC scroll — awaiting clinic machine setup")
+        # vncdo button 4 is scroll up, 5 is scroll down
+        btn = "4" if direction == "up" else ("5" if direction == "down" else "0")
+        if btn != "0":
+            clicks = ["click", btn] * amount
+            self._run_vncdo("move", str(x), str(y), *clicks)
 
 
 def create_vnc_controller(mock_mode: bool = True, **kwargs) -> BaseVNCController:

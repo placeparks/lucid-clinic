@@ -10,3 +10,4 @@ Pillow>=10.0.0
 twilio>=9.0.0
 resend>=2.0.0
 gunicorn>=23.0.0
+vncdotool==1.2.0
